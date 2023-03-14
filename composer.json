@@ -1,0 +1,46 @@
+{
+    "name": "oru/spec262",
+    "description": "ECMAScript specification supervisor",
+    "license": "BSD-3-Clause",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Felix Jahn",
+            "email": "felix.jahn@outlook.com"
+        }
+    ],
+    "repositories": {
+        "ecma262": {
+            "type": "package",
+            "package": {
+                "name": "tc39/ecma262",
+                "version": "1.0.0",
+                "source": {
+                    "url": "https://github.com/tc39/ecma262",
+                    "type": "git",
+                    "reference": "main"
+                }
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Oru\\Spec262\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "nikic/php-parser": "^4.15",
+        "tc39/ecma262": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "vimeo/psalm": "^5.8",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "symplify/easy-coding-standard": "^11.2"
+    }
+}
