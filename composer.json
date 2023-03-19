@@ -10,12 +10,12 @@
             "email": "felix.jahn@outlook.com"
         }
     ],
-    "repositories": {
-        "ecma262": {
+    "repositories": [
+       {
             "type": "package",
             "package": {
                 "name": "tc39/ecma262",
-                "version": "1.0.0",
+                "version": "main as 1.0.x-dev",
                 "source": {
                     "url": "https://github.com/tc39/ecma262",
                     "type": "git",
@@ -23,7 +23,7 @@
                 }
             }
         }
-    },
+    ],
     "autoload": {
         "psr-4": {
             "Oru\\Spec262\\": "src/"
@@ -36,7 +36,7 @@
     },
     "require": {
         "nikic/php-parser": "^4.15",
-        "tc39/ecma262": "^1.0",
+        "tc39/ecma262": "1.0.x-dev",
         "symfony/console": "^6.2",
         "jfcherng/php-diff": "^6.14"
     },
@@ -46,6 +46,7 @@
         "psalm/plugin-phpunit": "^0.18.4",
         "symplify/easy-coding-standard": "^11.2"
     },
-    "bin": ["bin/spec262"]
- 
+    "bin": [
+        "bin/spec262"
+    ]
 }
