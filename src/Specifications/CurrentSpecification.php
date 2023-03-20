@@ -22,7 +22,7 @@ final class CurrentSpecification implements Specification
         $dom = new DOMDocument('1.0', 'UTF-8');
         $dom->strictErrorChecking = false;
         libxml_use_internal_errors(true);
-        $dom->loadHTMLFile('./vendor/tc39/ecma262/spec.html', LIBXML_PARSEHUGE | LIBXML_NOWARNING);
+        $dom->loadHTMLFile('./specifications/20232003/spec.html', LIBXML_PARSEHUGE | LIBXML_NOWARNING);
         libxml_use_internal_errors(false);
 
         $clauses = $dom->getElementById($esid)?->getElementsByTagName('emu-alg');
