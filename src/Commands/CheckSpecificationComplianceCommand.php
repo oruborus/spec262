@@ -112,6 +112,10 @@ final class CheckSpecificationComplianceCommand extends Command
      */
     private function recursivelyFindAllPHPFilesInDirectory(string $path): array
     {
+        if (!is_dir($path) && is_file($path)) {
+            return [[$path]];
+        }
+
         $regex = new RegexIterator(
             new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($path)
