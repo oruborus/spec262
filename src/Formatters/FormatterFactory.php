@@ -13,7 +13,8 @@ final class FormatterFactory
     {
         return match ($specification) {
             '',
-            'https://tc39.es/ecma262/' => new CurrentFormatter(),
+            'https://tc39.es/ecma262/',
+            'https://262.ecma-international.org/12.0/' => new CurrentFormatter(),
             default => throw new RuntimeException("No formatter for `{$specification}` found")
         };
     }
