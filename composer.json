@@ -31,7 +31,5 @@
         "psalm/plugin-phpunit": "^0.18.4",
         "symplify/easy-coding-standard": "^11.2"
     },
-    "bin": [
-        "bin/spec262"
-    ]
+    "bin": ["spec262"]
 }
