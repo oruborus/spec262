@@ -7,6 +7,8 @@ namespace Oru\Spec262\Visitors;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
+use function array_values;
+use function ksort;
 use function ltrim;
 use function str_starts_with;
 use function substr;
@@ -34,7 +36,7 @@ final class StatementListVisitor extends NodeVisitorAbstract
                 continue;
             }
 
-            $this->comments[] = ltrim(substr($commentText, 2));
+            $this->comments[$comment->getStartLine()] = ltrim(substr($commentText, 2));
         }
 
         return;
@@ -45,7 +47,9 @@ final class StatementListVisitor extends NodeVisitorAbstract
      */
     public function comments(): array
     {
-        return $this->comments;
+        ksort($this->comments);
+
+        return array_values($this->comments);
     }
 
     public function reset(): void
