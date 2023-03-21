@@ -24,16 +24,15 @@ use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
-use function file_exists;
 use function file_get_contents;
-use function getcwd;
 use function ini_set;
 use function is_dir;
+use function is_file;
+use function is_link;
 use function iterator_to_array;
+use function readlink;
 use function realpath;
 use function sprintf;
-
-use const DIRECTORY_SEPARATOR;
 
 #[AsCommand(
     name: 'check',
@@ -70,14 +69,14 @@ final class CheckSpecificationComplianceCommand extends Command
         $io             = new SymfonyStyle($input, $output);
         $bufferedIo     = new SymfonyStyle($input, $bufferedOutput);
 
-        $providedPath = (string) $input->getArgument('path');
+        $path = (string) $input->getArgument('path');
 
-        $path = realpath(getcwd() . DIRECTORY_SEPARATOR . $providedPath)
-            ?: throw PathException::noCanonicalizedAbsolutePathName($providedPath);
-
-        if (!file_exists($path)) {
-            throw PathException::noFileOrDirectory($providedPath);
+        if (is_link($path)) {
+            $path = readlink($path) ?: throw PathException::couldNotResolveLinkPath($path);
         }
+
+        $path = realpath($path)
+            ?: throw PathException::noCanonicalizedAbsolutePathName((string) $input->getArgument('path'));
 
         $isDirectory = is_dir($path);
 

@@ -13,8 +13,8 @@ final class PathException extends RuntimeException
         throw new static("Could not convert the provided path `{$pathname}` to the canonicalized absolute pathname");
     }
 
-    public static function noFileOrDirectory(string $pathname): never
+    public static function couldNotResolveLinkPath(string $pathname): never
     {
-        throw new static("File or directory `{$pathname}` does not exist");
+        throw new static("Could not resolve the provided link path `{$pathname}`");
     }
 }
