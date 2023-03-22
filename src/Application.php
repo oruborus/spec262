@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Oru\Spec262\Commands;
+namespace Oru\Spec262;
 
 use Oru\Spec262\Exceptions\PathException;
 use Oru\Spec262\Visitors\FunctionVisitor;
@@ -20,10 +20,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\SingleCommandApplication;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
+use function assert;
 use function file_get_contents;
 use function ini_set;
 use function is_dir;
@@ -38,7 +40,7 @@ use function sprintf;
     name: 'check',
     description: 'Checks the provided source file or directory against the configured ECMAScript specification',
 )]
-final class CheckSpecificationComplianceCommand extends Command
+final class Application extends SingleCommandApplication
 {
     private Parser $parser;
 
@@ -72,7 +74,9 @@ final class CheckSpecificationComplianceCommand extends Command
         $path = (string) $input->getArgument('path');
 
         if (is_link($path)) {
-            $path = readlink($path) ?: throw PathException::couldNotResolveLinkPath($path);
+            $path = readlink($path);
+
+            assert($path !== false);
         }
 
         $path = realpath($path)

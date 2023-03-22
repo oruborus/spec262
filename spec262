@@ -1,14 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use Oru\Spec262\Commands\CheckSpecificationComplianceCommand;
-use Symfony\Component\Console\Application;
+require_once $_composer_autoload_path
+    ?? __DIR__ . '/vendor/autoload.php';
 
-require_once $_composer_autoload_path ?? __DIR__ . '/vendor/autoload.php';
-
-$application = new Application();
-$application->addCommands([
-    new CheckSpecificationComplianceCommand(),
-]);
-
-exit($application->run());
+exit((new \Oru\Spec262\Application())->run());
