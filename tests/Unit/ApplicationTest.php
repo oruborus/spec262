@@ -39,34 +39,49 @@ final class ApplicationTest extends TestCase
         $this->tester = new CommandTester($app);
     }
 
+    private function assertOutputContains(string $needle, string $message = ''): void
+    {
+        $this->assertStringContainsString($needle, $this->tester->getDisplay(), $message);
+    }
+
+    /**
+     * @psalm-suppress UnusedReturnValue
+     */
+    private function execute(array $input, array $options = []): int
+    {
+        return $this->tester->execute($input, $options);
+    }
+
+    private function assertCommandIsSuccessful(string $message = ''): void
+    {
+        $this->tester->assertCommandIsSuccessful($message);
+    }
+
     #[Test]
     public function displaysPathName(): void
     {
-        $this->tester->execute(['path' => 'tests/Fixtures/FreeFunctionFixture.php']);
+        $path = 'tests' . DIRECTORY_SEPARATOR . 'Fixtures' . DIRECTORY_SEPARATOR . 'FreeFunctionFixture.php';
+        $this->execute(['path' => $path]);
 
-        $this->tester->assertCommandIsSuccessful();
-        $this->assertStringContainsString(
-            'tests' . DIRECTORY_SEPARATOR . 'Fixtures' . DIRECTORY_SEPARATOR . 'FreeFunctionFixture.php',
-            $this->tester->getDisplay()
-        );
+        $this->assertCommandIsSuccessful();
+        $this->assertOutputContains($path);
     }
 
     #[Test]
     public function showsErrorMessageWhenPathCanNotBeAbsolutized(): void
     {
-        $this->tester->execute(['path' => '%%DOES NOT CONVERT%%']);
+        $path = '%%DOES NOT CONVERT%%';
+        $this->execute(['path' => $path]);
 
-        $this->assertStringContainsString(
-            PathException::noCanonicalizedAbsolutePathName('%%DOES NOT CONVERT%%')->getMessage(),
-            $this->tester->getDisplay()
-        );
+        $this->assertOutputContains(PathException::noCanonicalizedAbsolutePathName($path)->getMessage());
     }
 
     #[Test]
     public function canHandleSymlink(): void
     {
-        $this->tester->execute(['path' => 'tests/Fixtures/SymlinkClassFixture']);
+        $path = 'tests' . DIRECTORY_SEPARATOR . 'Fixtures' . DIRECTORY_SEPARATOR . 'SymlinkClassFixture';
+        $this->execute(['path' => $path]);
 
-        $this->tester->assertCommandIsSuccessful();
+        $this->assertCommandIsSuccessful();
     }
 }
