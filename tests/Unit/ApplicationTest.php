@@ -84,4 +84,10 @@ final class ApplicationTest extends TestCase
 
         $this->assertCommandIsSuccessful();
     }
+
+    // TODO: Handle symlinks with symlinks as target
+    // TODO: Detect symlink loops
+    // TODO: Detect already handled paths
+    // TODO: Handle directory paths
+    // TODO: Handle multiple provided paths
 }
