@@ -4,4 +4,7 @@
 require_once $_composer_autoload_path
     ?? __DIR__ . '/vendor/autoload.php';
 
-exit((new \Oru\Spec262\Application())->run());
+exit((new \Oru\Spec262\Application(
+    (new \PhpParser\ParserFactory())->create(\PhpParser\ParserFactory::ONLY_PHP7),
+    new \PhpParser\NodeTraverser()
+))->run());

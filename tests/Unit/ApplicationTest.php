@@ -6,6 +6,8 @@ namespace Tests\Unit;
 
 use Oru\Spec262\Application;
 use Oru\Spec262\Exceptions\PathException;
+use PhpParser\NodeTraverser;
+use PhpParser\ParserFactory;
 use PHPUnit\Framework\Attributes\Before;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -34,7 +36,10 @@ final class ApplicationTest extends TestCase
     #[Before]
     public function initializeTester(): void
     {
-        $app = new Application();
+        $app = new Application(
+            (new ParserFactory())->create(ParserFactory::ONLY_PHP7),
+            new NodeTraverser()
+        );
         $app->setAutoExit(false);
         $this->tester = new CommandTester($app);
     }

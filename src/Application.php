@@ -9,7 +9,6 @@ use Oru\Spec262\Visitors\FunctionVisitor;
 use Oru\Spec262\Visitors\MethodVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
-use PhpParser\ParserFactory;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
@@ -37,25 +36,16 @@ use function realpath;
 use function sprintf;
 
 #[AsCommand(
-    name: 'check',
+    name: '',
     description: 'Checks the provided source file or directory against the configured ECMAScript specification',
 )]
 final class Application extends SingleCommandApplication
 {
-    private Parser $parser;
-
-    private NodeTraverser $traverser;
-
-    /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    public function __construct(?string $name = null)
-    {
-        parent::__construct($name);
-
-        $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
-
-        $this->traverser = new NodeTraverser();
+    public function __construct(
+        private Parser $parser,
+        private NodeTraverser $traverser,
+    ) {
+        parent::__construct();
     }
 
     protected function configure(): void
