@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace Oru\Spec262;
 
-use Oru\Spec262\Exceptions\PathException;
 use Oru\Spec262\Visitors\FunctionVisitor;
 use Oru\Spec262\Visitors\MethodVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use RecursiveRegexIterator;
-use RegexIterator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,16 +19,8 @@ use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
-use function assert;
 use function file_get_contents;
 use function ini_set;
-use function is_dir;
-use function is_file;
-use function is_link;
-use function iterator_to_array;
-use function readlink;
-use function realpath;
-use function sprintf;
 
 #[AsCommand(
     name: '',
@@ -50,7 +37,7 @@ final class Application extends SingleCommandApplication
 
     protected function configure(): void
     {
-        $this->addArgument('path', InputArgument::REQUIRED, 'Source file or directory to check');
+        $this->addArgument('path', InputArgument::IS_ARRAY, 'Source file or directory to check');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -60,73 +47,43 @@ final class Application extends SingleCommandApplication
         $bufferedOutput = new BufferedOutput(OutputInterface::VERBOSITY_NORMAL, true);
         $io             = new SymfonyStyle($input, $output);
         $bufferedIo     = new SymfonyStyle($input, $bufferedOutput);
+        $pathResolver   = new PathResolver();
 
-        $path = (string) $input->getArgument('path');
-
-        if (is_link($path)) {
-            $path = readlink($path);
-
-            assert($path !== false);
-        }
-
-        $path = realpath($path)
-            ?: throw PathException::noCanonicalizedAbsolutePathName((string) $input->getArgument('path'));
-
-        $isDirectory = is_dir($path);
+        /**
+         * @var string[] $paths
+         */
+        $paths = $input->getArgument('path');
+        $paths = $pathResolver->resolvePaths($paths);
 
         $io->title('ECMAScript Specification Check');
 
-        /**
-         * @var iterable<string[]> $progressIterable
-         */
-        $progressIterable = $io->progressIterate($this->recursivelyFindAllPHPFilesInDirectory($path));
-
-        $io->text(sprintf('Checking %s `%s`', $isDirectory ? 'directory' : 'file', $path));
         $io->newLine();
+        $io->progressStart(count($paths));
 
-        foreach ($progressIterable as [$filePath]) {
+        foreach ($paths as $filePath) {
             $this->checkFile($filePath, $bufferedIo);
+            $io->progressAdvance(1);
         }
+
+        $io->progressFinish();
 
         $bufferedText = $bufferedOutput->fetch();
         if ($bufferedText === '') {
             $io->success('No errors!');
-        } else {
-            $io->error('Errors:');
+
+            return Command::SUCCESS;
         }
 
+        $io->error('Errors:');
         $io->write($bufferedText);
 
-        return Command::SUCCESS;
-    }
-
-    /**
-     * @return string[][]
-     */
-    private function recursivelyFindAllPHPFilesInDirectory(string $path): array
-    {
-        if (!is_dir($path) && is_file($path)) {
-            return [[$path]];
-        }
-
-        $regex = new RegexIterator(
-            new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path)
-            ),
-            '/^.+\.php$/i',
-            RecursiveRegexIterator::GET_MATCH
-        );
-
-        /**
-         * @var string[][]
-         */
-        return iterator_to_array($regex);
+        return Command::FAILURE;
     }
 
     private function checkFile(string $filePath, StyleInterface&OutputInterface $io): void
     {
         $functionVisitor = new FunctionVisitor($io, $filePath);
-        $methodVisitor = new MethodVisitor($io, $filePath);
+        $methodVisitor   = new MethodVisitor($io, $filePath);
         $this->traverser->addVisitor($functionVisitor);
         $this->traverser->addVisitor($methodVisitor);
 
@@ -135,7 +92,7 @@ final class Application extends SingleCommandApplication
                 $this->traverser->traverse($stmts);
             }
         } catch (Throwable $e) {
-            echo 'Parse Error: ', $e->getMessage();
+            $io->error('Parse Error: ', $e->getMessage());
         } finally {
             $this->traverser->removeVisitor($functionVisitor);
             $this->traverser->removeVisitor($methodVisitor);
